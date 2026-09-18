@@ -45,6 +45,14 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+// 🟢 LIGHTWEIGHT HEALTH CHECK / KEEP-ALIVE ENDPOINTS
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
+});
+app.get("/api/v1/health", (req, res) => {
+    res.status(200).json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
+});
+
 // 2. 🚀 SERVERLESS DATABASE INSTANCE VALVE MIDDLEWARE:
 app.use(async (req, res, next) => {
     try {
