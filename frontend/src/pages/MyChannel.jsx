@@ -87,8 +87,8 @@ const MyChannel = () => {
         return (
             <div className="w-full min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
                 <div className="flex flex-col items-center gap-4 animate-pulse">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800/80 flex items-center justify-center text-indigo-400 animate-spin">
-                        <Compass className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800/80 flex items-center justify-center text-indigo-400">
+                        <Compass className="w-5 h-5 animate-spin" />
                     </div>
                     <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Loading Channel Archive...</span>
                 </div>
