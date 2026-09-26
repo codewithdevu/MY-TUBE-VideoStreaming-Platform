@@ -275,17 +275,17 @@ const Tweet = () => {
                                                     </div>
 
                                                     {isOwner && (
-                                                        <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 px-1.5 py-0.5 rounded-xl border border-slate-850">
+                                                        <div className="flex items-center gap-1 shrink-0 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-xl">
                                                             <button 
                                                                 onClick={() => setEditingTweet(tweet)} 
-                                                                className="p-1 text-slate-500 hover:text-indigo-400 transition-colors"
+                                                                className="p-1 text-slate-200 hover:text-indigo-400 transition-colors"
                                                                 title="Edit Tweet"
                                                             >
                                                                 <Edit className="w-3.5 h-3.5" />
                                                             </button>
                                                             <button 
                                                                 onClick={() => handleDeleteTweet(tweet._id)} 
-                                                                className="p-1 text-slate-500 hover:text-rose-400 transition-colors"
+                                                                className="p-1 text-slate-200 hover:text-rose-400 transition-colors"
                                                                 title="Delete Tweet"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />

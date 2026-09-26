@@ -221,7 +221,7 @@ const VideoDetail = () => {
                 hlsInstanceRef.current = null;
             }
         };
-    }, [video, loading, isTranscoding]);
+    }, [video?._id, video?.hlsMasterUrl, video?.videoFile, loading, isTranscoding]);
 
     // DYNAMIC CONTROLS DISAPPEAR PIPELINE (FOR MOBILE AUTO-HIDE)
     const resetControlsTimeout = () => {
@@ -254,8 +254,26 @@ const VideoDetail = () => {
 
     useEffect(() => {
         resetControlsTimeout();
+
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+                    try {
+                        window.screen.orientation.unlock();
+                    } catch (e) {
+                        // ignore unlock errors on exit
+                    }
+                }
+            }
+        };
+
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
         return () => {
             if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+            document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
         };
     }, [isPlaying]);
 
@@ -295,12 +313,51 @@ const VideoDetail = () => {
         resetControlsTimeout();
     };
 
-    const toggleFullScreen = () => {
-        if (!playerContainerRef.current) return;
-        if (!document.fullscreenElement) {
-            playerContainerRef.current.requestFullscreen().catch(err => console.log(err));
-        } else {
-            document.exitFullscreen();
+    const toggleFullScreen = async () => {
+        if (!playerContainerRef.current && !videoRef.current) return;
+
+        try {
+            const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+
+            if (!isFull) {
+                if (playerContainerRef.current.requestFullscreen) {
+                    await playerContainerRef.current.requestFullscreen();
+                } else if (playerContainerRef.current.webkitRequestFullscreen) {
+                    await playerContainerRef.current.webkitRequestFullscreen();
+                } else if (videoRef.current && videoRef.current.webkitEnterFullscreen) {
+                    videoRef.current.webkitEnterFullscreen();
+                }
+
+                // 📱 MOBILE AUTO-ROTATE & ORIENTATION SUPPORT
+                if (window.screen && window.screen.orientation) {
+                    if (window.screen.orientation.lock) {
+                        window.screen.orientation.lock("landscape").catch(() => {
+                            if (window.screen.orientation.unlock) {
+                                window.screen.orientation.unlock();
+                            }
+                        });
+                    }
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                }
+
+                if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+                    try {
+                        window.screen.orientation.unlock();
+                    } catch (e) {
+                        console.log("Orientation unlock error:", e);
+                    }
+                }
+            }
+        } catch (err) {
+            console.log("Fullscreen request error:", err);
+            if (videoRef.current && videoRef.current.webkitEnterFullscreen) {
+                videoRef.current.webkitEnterFullscreen();
+            }
         }
         resetControlsTimeout();
     };
@@ -661,6 +718,7 @@ const VideoDetail = () => {
 
                             <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1 px-0.5 w-full sm:w-auto shrink-0 box-border">
                                 <button
+                                    type="button"
                                     onClick={handleLike}
                                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 shrink-0 border ${video?.isLiked
                                         ? "bg-linear-to-r from-indigo-500/10 to-transparent border-indigo-500/30 text-indigo-300 shadow-md"
@@ -801,22 +859,22 @@ const VideoDetail = () => {
                                         </div>
 
                                         {isCommentOwner && !isEditingThisComment && (
-                                            <div className="flex gap-1 absolute right-2 top-2 bg-slate-950 border border-slate-900 rounded-lg p-1 shadow-md shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                                            <div className="flex gap-1 absolute right-2 top-2 bg-slate-900/90 border border-slate-800 rounded-lg p-1 shadow-md shrink-0 transition-opacity duration-200 z-20">
                                                 <button
                                                     type="button"
                                                     onClick={() => startEditing(c)}
-                                                    className="p-1 text-slate-500 hover:text-indigo-400 transition-colors"
+                                                    className="p-1 text-slate-200 hover:text-indigo-400 transition-colors"
                                                     title="Edit Comment"
                                                 >
-                                                    <Pencil className="w-3 h-3" />
+                                                    <Pencil className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => deleteComment(c._id)}
-                                                    className="p-1 text-slate-500 hover:text-rose-400 transition-colors"
+                                                    className="p-1 text-slate-200 hover:text-rose-400 transition-colors"
                                                     title="Delete Comment"
                                                 >
-                                                    <Trash2 className="w-3 h-3" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
                                         )}
