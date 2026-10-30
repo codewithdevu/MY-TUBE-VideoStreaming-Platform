@@ -53,7 +53,7 @@ app.get("/api/v1/health", (req, res) => {
     res.status(200).json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
 });
 
-// 2. 🚀 SERVERLESS DATABASE INSTANCE VALVE MIDDLEWARE:
+// 2. 🚀 SERVERLESS DATABASE INSTANCE VALUE MIDDLEWARE:
 app.use(async (req, res, next) => {
     try {
         await connectDb();
